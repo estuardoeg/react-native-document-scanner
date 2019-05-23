@@ -689,18 +689,36 @@ public class OpenNoteCameraView extends JavaCameraView implements PictureCallbac
 
         WritableMap data = new WritableNativeMap();
         if(this.listener != null){
-            data.putString("path",fileName);
-
 
             String filePath = fileName;
+            String filePathCropped = filePath.replace(".jpg","-cropped.jpg");
+
+            data.putString("path",fileName);
+            data.putString("croppedImage",fileName);
+
             File imgFile = new File(filePath);
             if (imgFile.exists() && imgFile.length() > 0) {
+                OutputStream outStream = null;
+                File file = new File(filePath);
+                try {
+                    outStream = new FileOutputStream(filePathCropped);
+                    Bitmap mBitmap = BitmapFactory.decodeFile(filePath);
+                    mBitmap.compress(Bitmap.CompressFormat.JPEG, 60, outStream);
+                    outStream.close();
+                    Log.d(TAG, "COMPRESS SUCCESFUL");
+                } catch (Exception e) {
+                    Log.d(TAG, "COMPRESS ERROR");
+                    e.printStackTrace();
+                }
+
+                /*
                 Bitmap bm = BitmapFactory.decodeFile(filePath);
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream();
                 bm.compress(Bitmap.CompressFormat.JPEG, 100, bOut);
                 String base64Image = Base64.encodeToString(bOut.toByteArray(), Base64.DEFAULT);
                 data.putString("croppedImage",base64Image);
                 Log.d(TAG, "base64Image: " + base64Image);
+                */
             }
             
             this.listener.onPictureTaken(data);
